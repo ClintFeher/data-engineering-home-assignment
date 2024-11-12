@@ -22,4 +22,3 @@ if not all([aws_access_key_id, aws_secret_access_key, bucket]):
     )
 base_folder = os.path.join("s3a://", bucket, "before_deployment")
 incoming_table_folder = os.path.join(base_folder, "incoming")
-raw_folder = os.path.join(base_folder, "raw")
