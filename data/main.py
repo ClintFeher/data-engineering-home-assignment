@@ -1,10 +1,5 @@
 """
 This is the main program of the assignment to perform the desired transformations.
-Assumption
-* Null in the close is valid and each function has its own assumptions for handling the nulls.
-* In general, I could make a pre-prcessing function to create 2 data frames:
-  1. Valid dataframe containing only rows where all the columns are not null.
-  2. Error dataframe that can be sent to a Kafka error topic.
 """
 
 import os
