@@ -21,4 +21,4 @@ if not all([aws_access_key_id, aws_secret_access_key, bucket]):
         "Halting application, please add the required keys as in environment variables."
     )
 base_folder = os.path.join("s3a://", bucket, "before_deployment")
-incoming_table_folder = os.path.join(base_folder, "incoming")
+incoming_file = os.path.join(base_folder, "incoming", "stocks_data.csv")
