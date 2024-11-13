@@ -12,14 +12,16 @@ from typing import Callable, Optional
 
 import pyspark.sql.functions as F
 from pyspark.sql import DataFrame, SparkSession, Window
+import pyspark.sql.types as types
 
 import consts.constants as consts
 from data.params import (
     aws_access_key_id,
     aws_secret_access_key,
-    incoming_table_folder,
+    incoming_file,
     base_folder,
 )
+from data.preprocess import preprocess_rdd
 from log.logger import logger
 
 
@@ -193,14 +195,36 @@ if __name__ == "__main__":
         .config("spark.hadoop.fs.s3a.secret.key", aws_secret_access_key)
         .getOrCreate()
     )
+    sc = spark.sparkContext
     try:
-        logger.info("Loading data from %s.", incoming_table_folder)
-        incoming_data = spark.read.option("header", "true").csv(incoming_table_folder)
+        incoming_data_rdd = sc.textFile(incoming_file)
     except Exception as ex:
-        logger.exception(
-            "Error reading data from incoming folder %s", incoming_table_folder
-        )
+        logger.exception("Error reading data from incoming file %s", incoming_file)
         raise ex
+    try:
+        header_row, incoming_data, error_data = preprocess_rdd(incoming_data_rdd)
+        if not error_data.isEmpty():
+            logger.error(
+                "There are invalid lines in the specified file, they will be ignored\n"
+                "Note that calculations might be biased or incorrect because of gaps in dates.\n"
+                "The data in the resulting tables might be incorrect."
+            )
+        schema = types.StructType(
+            [
+                types.StructField("DATE", types.DateType(), False),
+                types.StructField("OPEN", types.FloatType(), False),
+                types.StructField("HIGH", types.FloatType(), False),
+                types.StructField("LOW", types.FloatType(), False),
+                types.StructField("CLOSE", types.FloatType(), False),
+                types.StructField("VOLUME", types.IntegerType(), False),
+                types.StructField("TICKER", types.StringType(), False),
+            ]
+        )
+        incoming_data = incoming_data.toDF(schema=schema)
+    except Exception as ex:
+        logger.exception("Error parsing source file %s", incoming_file)
+        raise ex
+
     incoming_data = incoming_data.repartition(consts.TICKER).sort(consts.DATE)
     daily_return_df = create_table(
         calculate_daily_returns, None, "daily_return", incoming_data

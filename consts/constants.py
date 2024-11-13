@@ -8,14 +8,15 @@ S3_BUCKET = "S3_BUCKET"
 # Table columns
 TICKER = "TICKER"
 DATE = "DATE"
-CLOSE = "close"
+OPEN = "OPEN"
+CLOSE = "CLOSE"
 HIGH = "HIGH"
 LOW = "LOW"
 VOLUME = "VOLUME"
-RETURN = "return"
-AVERAGE_RETURN = "average_return"
-STDDEV = "standard_deviation"
-VALUE = "value"
+RETURN = "RETURN"
+AVERAGE_RETURN = "AVERAGE_RETURN"
+STDDEV = "STANDARD_DEVIATION"
+VALUE = "VALUE"
 
 # Calculation related
 TRADING_DAYS = 252
